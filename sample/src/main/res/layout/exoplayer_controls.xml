@@ -18,7 +18,6 @@
     android:layoutDirection="ltr"
     android:orientation="vertical">
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -34,7 +33,7 @@
             android:includeFontPadding="false"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
-            android:textColor="#FFBEBEBE"
+            android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -52,7 +51,6 @@
                 android:background="@drawable/video_frame"
                 android:padding="@dimen/video_frame_width">
 
-
                 <com.google.android.exoplayer2.ui.SimpleExoPlayerView
                     android:id="@+id/previewPlayerView"
                     android:layout_width="match_parent"
@@ -62,21 +60,17 @@
                     app:use_artwork="false"
                     app:use_controller="false" />
 
-
             </FrameLayout>
 
             <com.github.rubensousa.previewseekbar.PreviewSeekBar
                 android:id="@+id/exo_progress"
-                style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="28dp"
                 android:layout_below="@id/previewFrameLayout"
                 android:layout_marginTop="10dp"
-                android:max="800"
-                android:progressTint="@color/colorPrimary"
-                android:thumbTint="@color/colorPrimary"
-                app:paddingStart="10dp" />
-
+                app:paddingStart="10dp"
+                app:played_color="@android:color/white"
+                app:buffered_color="#AAA"/>
 
         </com.github.rubensousa.previewseekbar.PreviewSeekBarLayout>
 
@@ -88,7 +82,7 @@
             android:includeFontPadding="false"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
-            android:textColor="#FFBEBEBE"
+            android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold" />
 

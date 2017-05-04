@@ -18,6 +18,7 @@
 package com.github.rubensousa.previewseekbar.sample;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,16 +26,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.SeekBar;
 
 import com.github.rubensousa.previewseekbar.PreviewSeekBar;
 import com.github.rubensousa.previewseekbar.PreviewSeekBarLayout;
 import com.github.rubensousa.previewseekbar.sample.exoplayer.ExoPlayerManager;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.ui.TimeBar;
 
 
-public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener,
-        Toolbar.OnMenuItemClickListener {
+public class MainActivity extends AppCompatActivity implements Toolbar.OnMenuItemClickListener, TimeBar.OnScrubListener {
 
     private static final int PICK_FILE_REQUEST_CODE = 2;
 
@@ -53,10 +53,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         seekBar = (PreviewSeekBar) playerView.findViewById(R.id.exo_progress);
         seekBarLayout = (PreviewSeekBarLayout) findViewById(R.id.previewSeekBarLayout);
 
+        seekBarLayout.setTintColor(Color.WHITE);
 
-        seekBarLayout.setTintColorResource(R.color.colorPrimary);
-
-        seekBar.addOnSeekBarChangeListener(this);
+        seekBar.addListener(this);
         exoPlayerManager = new ExoPlayerManager(playerView, previewPlayerView, seekBarLayout);
         exoPlayerManager.play(Uri.parse(getString(R.string.url_hls)));
         seekBarLayout.setup(exoPlayerManager);
@@ -106,17 +105,17 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    public void onScrubStart(final TimeBar timeBar) {
 
     }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
+    public void onScrubMove(final TimeBar timeBar, final long progress) {
 
     }
 
     @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
+    public void onScrubStop(final TimeBar timeBar, final long progress, final boolean cancelled) {
         exoPlayerManager.stopPreview();
     }
 
@@ -132,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 exoPlayerManager.stopPreview();
             } else {
                 seekBarLayout.showPreview();
-                exoPlayerManager.loadPreview(seekBar.getProgress(), seekBar.getMax());
+                exoPlayerManager.loadPreview(seekBar.getPosition(), seekBar.getDuration());
             }
         }
         return true;

@@ -3,9 +3,10 @@ package com.github.rubensousa.previewseekbar;
 
 import android.os.Build;
 import android.view.View;
-import android.widget.SeekBar;
 
-class PreviewDelegate implements SeekBar.OnSeekBarChangeListener {
+import com.google.android.exoplayer2.ui.TimeBar;
+
+class PreviewDelegate implements TimeBar.OnScrubListener {
 
     private PreviewSeekBarLayout previewSeekBarLayout;
     private PreviewAnimator animator;
@@ -21,7 +22,7 @@ class PreviewDelegate implements SeekBar.OnSeekBarChangeListener {
         previewSeekBarLayout.getPreviewFrameLayout().setVisibility(View.INVISIBLE);
         previewSeekBarLayout.getMorphView().setVisibility(View.INVISIBLE);
         previewSeekBarLayout.getFrameView().setVisibility(View.INVISIBLE);
-        previewSeekBarLayout.getSeekBar().addOnSeekBarChangeListener(this);
+        previewSeekBarLayout.getSeekBar().addListener(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.animator = new PreviewAnimatorLollipopImpl(previewSeekBarLayout);
         } else {
@@ -49,10 +50,15 @@ class PreviewDelegate implements SeekBar.OnSeekBarChangeListener {
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+    public void onScrubStart(final TimeBar timeBar) {
+        startTouch = true;
+    }
+
+    @Override
+    public void onScrubMove(final TimeBar timeBar, final long position) {
         if (setup) {
             animator.move();
-            if (!showing && !startTouch && fromUser) {
+            if (!showing && !startTouch) {
                 animator.show();
                 showing = true;
             }
@@ -61,17 +67,11 @@ class PreviewDelegate implements SeekBar.OnSeekBarChangeListener {
     }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        startTouch = true;
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
+    public void onScrubStop(final TimeBar timeBar, final long position, final boolean cancelled) {
         if (showing) {
             animator.hide();
         }
         showing = false;
         startTouch = false;
     }
-
 }

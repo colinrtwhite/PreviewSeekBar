@@ -3,13 +3,7 @@ package com.github.rubensousa.previewseekbar;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.view.View;
-import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 
 class PreviewAnimatorImpl extends PreviewAnimator {
 
@@ -31,7 +25,7 @@ class PreviewAnimatorImpl extends PreviewAnimator {
         }
     };
 
-    public PreviewAnimatorImpl(PreviewSeekBarLayout previewSeekBarLayout) {
+    PreviewAnimatorImpl(PreviewSeekBarLayout previewSeekBarLayout) {
         super(previewSeekBarLayout);
     }
 
@@ -47,7 +41,7 @@ class PreviewAnimatorImpl extends PreviewAnimator {
                 .scaleY(4.0f)
                 .scaleX(4.0f)
                 .setDuration(MORPH_MOVE_DURATION)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setInterpolator(ACCELERATE_DECELERATE_INTERPOLATOR)
                 .setListener(showListener);
     }
 
@@ -64,7 +58,7 @@ class PreviewAnimatorImpl extends PreviewAnimator {
 
     private void startReveal() {
         previewView.animate()
-                .setInterpolator(new AccelerateInterpolator())
+                .setInterpolator(ACCELERATE_INTERPOLATOR)
                 .setDuration(MORPH_REVEAL_DURATION)
                 .scaleX(1)
                 .scaleY(1)
@@ -91,11 +85,11 @@ class PreviewAnimatorImpl extends PreviewAnimator {
 
     private void startUnreveal() {
         frameView.animate().alpha(1f).setDuration(UNMORPH_UNREVEAL_DURATION)
-                .setInterpolator(new AccelerateInterpolator());
+                .setInterpolator(ACCELERATE_INTERPOLATOR);
 
         previewView.animate()
                 .setDuration(UNMORPH_UNREVEAL_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
+                .setInterpolator(ACCELERATE_INTERPOLATOR)
                 .scaleX(getScaleXStart())
                 .scaleY(getScaleYStart())
                 .setListener(new AnimatorListenerAdapter() {
@@ -111,7 +105,7 @@ class PreviewAnimatorImpl extends PreviewAnimator {
                                 .scaleY(0.5f)
                                 .scaleX(0.5f)
                                 .setDuration(UNMORPH_MOVE_DURATION)
-                                .setInterpolator(new AccelerateInterpolator())
+                                .setInterpolator(ACCELERATE_INTERPOLATOR)
                                 .setListener(hideListener);
                     }
                 });

@@ -7,9 +7,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 
 class PreviewAnimatorLollipopImpl extends PreviewAnimator {
 
@@ -31,7 +28,7 @@ class PreviewAnimatorLollipopImpl extends PreviewAnimator {
         }
     };
 
-    public PreviewAnimatorLollipopImpl(PreviewSeekBarLayout previewSeekBarLayout) {
+    PreviewAnimatorLollipopImpl(PreviewSeekBarLayout previewSeekBarLayout) {
         super(previewSeekBarLayout);
     }
 
@@ -45,7 +42,7 @@ class PreviewAnimatorLollipopImpl extends PreviewAnimator {
                 .scaleY(4.0f)
                 .scaleX(4.0f)
                 .setDuration(MORPH_MOVE_DURATION)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setInterpolator(ACCELERATE_DECELERATE_INTERPOLATOR)
                 .setListener(showListener);
     }
 
@@ -70,7 +67,7 @@ class PreviewAnimatorLollipopImpl extends PreviewAnimator {
 
         animator.setTarget(previewView);
         animator.setDuration(MORPH_REVEAL_DURATION);
-        animator.setInterpolator(new AccelerateInterpolator());
+        animator.setInterpolator(ACCELERATE_INTERPOLATOR);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -115,14 +112,14 @@ class PreviewAnimatorLollipopImpl extends PreviewAnimator {
                         .scaleY(0.5f)
                         .scaleX(0.5f)
                         .setDuration(UNMORPH_MOVE_DURATION)
-                        .setInterpolator(new AccelerateInterpolator())
+                        .setInterpolator(ACCELERATE_INTERPOLATOR)
                         .setListener(hideListener);
             }
         });
         frameView.animate().alpha(1f).setDuration(UNMORPH_UNREVEAL_DURATION)
-                .setInterpolator(new AccelerateInterpolator());
+                .setInterpolator(ACCELERATE_INTERPOLATOR);
         animator.setDuration(UNMORPH_UNREVEAL_DURATION)
-                .setInterpolator(new AccelerateInterpolator());
+                .setInterpolator(ACCELERATE_INTERPOLATOR);
         animator.start();
     }
 

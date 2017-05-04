@@ -2,8 +2,12 @@ package com.github.rubensousa.previewseekbar;
 
 
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 
 abstract class PreviewAnimator {
+    static final AccelerateDecelerateInterpolator ACCELERATE_DECELERATE_INTERPOLATOR = new AccelerateDecelerateInterpolator();
+    static final AccelerateInterpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
 
     static final int MORPH_REVEAL_DURATION = 250;
     static final int MORPH_MOVE_DURATION = 200;
@@ -33,23 +37,23 @@ abstract class PreviewAnimator {
 
     public abstract void hide();
 
-    float getWidthOffset(int progress) {
-        return (float) progress / previewSeekBar.getMax();
+    float getWidthOffset(long progress) {
+        return (float) progress / previewSeekBar.getDuration();
     }
 
     float getPreviewCenterX(int width) {
         return (previewSeekBarLayout.getWidth() - previewView.getWidth())
-                * getWidthOffset(previewSeekBar.getProgress()) + previewView.getWidth() / 2f
+                * getWidthOffset(previewSeekBar.getPosition()) + previewView.getWidth() / 2f
                 - width / 2f;
     }
 
     float getPreviewX() {
         return ((float) (previewSeekBarLayout.getWidth() - previewView.getWidth()))
-                * getWidthOffset(previewSeekBar.getProgress());
+                * getWidthOffset(previewSeekBar.getPosition());
     }
 
     float getHideY() {
-        return previewSeekBar.getY() + previewSeekBar.getThumbOffset();
+        return previewSeekBar.getY() + 0;
     }
 
     float getShowY(){

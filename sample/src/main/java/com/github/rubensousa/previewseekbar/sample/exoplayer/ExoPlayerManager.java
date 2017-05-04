@@ -24,14 +24,17 @@ import android.view.View;
 import com.github.rubensousa.previewseekbar.PreviewLoader;
 import com.github.rubensousa.previewseekbar.PreviewSeekBarLayout;
 import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.AdaptiveVideoTrackSelection;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -43,7 +46,7 @@ import com.google.android.exoplayer2.util.Util;
 public class ExoPlayerManager implements ExoPlayer.EventListener, PreviewLoader {
 
     // 1 minute
-    private static final int ROUND_DECIMALS_THRESHOLD = 1 * 60 * 1000;
+    private static final int ROUND_DECIMALS_THRESHOLD = 60 * 1000;
 
     private ExoPlayerMediaSourceBuilder mediaSourceBuilder;
     private SimpleExoPlayerView playerView;
@@ -126,12 +129,11 @@ public class ExoPlayerManager implements ExoPlayer.EventListener, PreviewLoader 
     }
 
     private SimpleExoPlayer createFullPlayer() {
-        TrackSelection.Factory videoTrackSelectionFactory
-                = new AdaptiveVideoTrackSelection.Factory(new DefaultBandwidthMeter());
+        TrackSelection.Factory videoTrackSelectionFactory = new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter());
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
         LoadControl loadControl = new DefaultLoadControl();
-        SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(playerView.getContext(),
-                trackSelector, loadControl);
+        RenderersFactory renderersFactory = new DefaultRenderersFactory(playerView.getContext());
+        SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
         player.setPlayWhenReady(true);
         player.prepare(mediaSourceBuilder.getMediaSource(false));
         player.addListener(this);
@@ -142,8 +144,8 @@ public class ExoPlayerManager implements ExoPlayer.EventListener, PreviewLoader 
         TrackSelection.Factory videoTrackSelectionFactory = new WorstVideoTrackSelection.Factory();
         TrackSelector trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
         LoadControl loadControl = new PreviewLoadControl();
-        SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(previewPlayerView.getContext(),
-                trackSelector, loadControl);
+        RenderersFactory renderersFactory = new DefaultRenderersFactory(playerView.getContext());
+        SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector, loadControl);
         player.setPlayWhenReady(false);
         player.prepare(mediaSourceBuilder.getMediaSource(true));
         return player;
@@ -182,8 +184,13 @@ public class ExoPlayerManager implements ExoPlayer.EventListener, PreviewLoader 
     }
 
     @Override
-    public void loadPreview(long currentPosition, long max) {
-        float offset = (float) currentPosition / max;
+    public void onPlaybackParametersChanged(final PlaybackParameters playbackParameters) {
+
+    }
+
+    @Override
+    public void loadPreview(long position, long duration) {
+        float offset = (float) position / duration;
         int scale = player.getDuration() >= ROUND_DECIMALS_THRESHOLD ? 2 : 1;
         float offsetRounded = roundOffset(offset, scale);
         player.setPlayWhenReady(false);

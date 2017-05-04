@@ -1,7 +1,7 @@
 package com.github.rubensousa.previewseekbar;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.ColorInt;
@@ -15,9 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 
-public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSeekBarChangeListener {
+import com.google.android.exoplayer2.ui.TimeBar;
+
+public class PreviewSeekBarLayout extends RelativeLayout implements TimeBar.OnScrubListener {
 
     private PreviewDelegate delegate;
     private PreviewSeekBar seekBar;
@@ -30,20 +31,20 @@ public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSe
 
     public PreviewSeekBarLayout(Context context) {
         super(context);
-        init(context, null);
+        init(context);
     }
 
     public PreviewSeekBarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        init(context);
     }
 
     public PreviewSeekBarLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+        init(context);
     }
 
-    private void init(Context context, AttributeSet attrs) {
+    private void init(Context context) {
         TypedValue outValue = new TypedValue();
 
         getContext().getTheme().resolveAttribute(R.attr.colorAccent, outValue, true);
@@ -58,24 +59,21 @@ public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSe
         delegate = new PreviewDelegate(this);
     }
 
+    @SuppressLint("DrawAllocation")
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        if (getWidth() == 0 || getHeight() == 0) {
-            return;
-        } else if (firstLayout) {
-
+        if (getWidth() > 0 && getHeight() > 0 && firstLayout) {
             // Check if we have the proper views
             if (!checkChilds()) {
-                throw new IllegalStateException("You need to add a PreviewSeekBar" +
-                        "and a FrameLayout as direct childs");
+                throw new IllegalStateException("You need to add a PreviewSeekBar and a FrameLayout as direct childs");
             }
 
             // Set proper seek bar margins
             setupSeekbarMargins();
 
             // Setup colors for the morph view and frame view
-            setupColors();
+            setTintColor(tintColor);
 
             delegate.setup();
 
@@ -84,11 +82,8 @@ public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSe
             }
 
             // Setup morph view
-            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(0, 0);
-            layoutParams.width = getResources()
-                    .getDimensionPixelSize(R.dimen.previewseekbar_indicator_width);
-            layoutParams.height = layoutParams.width;
-            addView(morphView, layoutParams);
+            int size = getResources().getDimensionPixelSize(R.dimen.previewseekbar_indicator_width);
+            addView(morphView, new ViewGroup.LayoutParams(size, size));
 
             // Add frame view to the preview layout
             FrameLayout.LayoutParams frameLayoutParams
@@ -103,7 +98,7 @@ public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSe
     public void setup(PreviewLoader loader) {
         this.loader = loader;
         if (this.loader != null && seekBar != null) {
-            seekBar.addOnSeekBarChangeListener(this);
+            seekBar.addListener(this);
         }
     }
 
@@ -147,29 +142,19 @@ public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSe
         setTintColor(ContextCompat.getColor(getContext(), color));
     }
 
-    private void setupColors() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ColorStateList list = seekBar.getThumbTintList();
-            if (list != null) {
-                tintColor = list.getDefaultColor();
-            }
-        }
-        setTintColor(tintColor);
-    }
-
     /**
      * Align seekbar thumb with the frame layout center
      */
     private void setupSeekbarMargins() {
         LayoutParams layoutParams = (LayoutParams) seekBar.getLayoutParams();
 
-        layoutParams.rightMargin = (int) (previewFrameLayout.getWidth() / 2
-                - seekBar.getThumb().getIntrinsicWidth() * 0.9f);
-        layoutParams.leftMargin = layoutParams.rightMargin;
+        int halfWidth = (previewFrameLayout.getWidth() - getResources().getDimensionPixelSize(R.dimen.scrubber_default_size)) / 2;
+        layoutParams.rightMargin = halfWidth;
+        layoutParams.leftMargin = halfWidth;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            layoutParams.setMarginEnd(layoutParams.leftMargin);
             layoutParams.setMarginStart(layoutParams.leftMargin);
+            layoutParams.setMarginEnd(layoutParams.rightMargin);
         }
 
         seekBar.setLayoutParams(layoutParams);
@@ -203,27 +188,23 @@ public class PreviewSeekBarLayout extends RelativeLayout implements SeekBar.OnSe
             }
         }
 
-        return hasSeekbar && hasFrameLayout;
+        return false;
     }
 
     @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (fromUser) {
-            if (loader != null) {
-                loader.loadPreview(progress, seekBar.getMax());
-            }
-            showPreview();
+    public void onScrubStart(final TimeBar timeBar) {
+    }
+
+    @Override
+    public void onScrubMove(final TimeBar timeBar, final long position) {
+        if (loader != null) {
+            loader.loadPreview(position, seekBar.getDuration());
         }
+        showPreview();
     }
 
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-
-    }
-
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
+    public void onScrubStop(final TimeBar timeBar, final long position, final boolean cancelled) {
         hidePreview();
     }
-
 }
